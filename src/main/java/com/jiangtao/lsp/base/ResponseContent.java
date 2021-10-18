@@ -7,10 +7,10 @@ import lombok.Data;
  * @Author: jiangtao
  * @Date: 2021/10/14 20:52
  */
-public class ResponseContent implements Content {
+public class ResponseContent extends Content {
     private Integer id;
     private Object result;
-    private ResponseError error;
+    private ResponseError error;  // choice
 
     static class ResponseError {
         public Integer code;
@@ -24,17 +24,22 @@ public class ResponseContent implements Content {
         this.error = error;
     }
 
-
-    public Integer getId() {
-        return id;
+    public ResponseContent(Integer id, Object result) {
+        this.id = id;
+        this.result = result;
     }
 
-    public void setId(Integer id) {
+    public ResponseContent(Integer id, ResponseError error) {
+        this.id = id;
+        this.error = error;
+    }
+
+    public ResponseContent(Integer id) {
         this.id = id;
     }
 
-    public Object getResult() {
-        return result;
+    public Integer getId() {
+        return id;
     }
 
     public void setResult(Object result) {

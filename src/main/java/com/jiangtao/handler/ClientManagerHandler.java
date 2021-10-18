@@ -21,7 +21,6 @@ public class ClientManagerHandler extends ChannelInboundHandlerAdapter {
         LSPServerManager.getMap().put(getRemoteAddress(ctx), ctx.channel());
         log.info("Client: " + getRemoteAddress(ctx) + " connected.");
 
-//        Client client = ClientProxy.getInstance(new FirstRequest(1, "server"));
     }
 
     @Override

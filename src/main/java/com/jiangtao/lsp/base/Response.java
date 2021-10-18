@@ -7,30 +7,28 @@ import com.jiangtao.lsp.base.interfaces.Message;
  * @Author: jiangtao
  * @Date: 2021/10/14 21:04
  */
-public class Response implements Message{
-    private Header header;
+public class Response extends Message {
     private ResponseContent content;
 
-    private void autoCalculateHeaderLength() {
-        this.header = new Header(JSON.toJSON(content).toString().length());
-    }
 
     public Response(ResponseContent content) {
         this.content = content;
         autoCalculateHeaderLength();
     }
 
-    public Response(Integer id, Object result, ResponseContent.ResponseError error){
-        this.content = new ResponseContent(id, result, error);
+    public Response(Integer id){
+        this.content = new ResponseContent(id);
         autoCalculateHeaderLength();
     }
 
-    public Header getHeader() {
-        return header;
+    public Response(Integer id, ResponseContent.ResponseError error){
+        this.content = new ResponseContent(id, error);
+        autoCalculateHeaderLength();
     }
 
-    public void setHeader(Header header) {
-        this.header = header;
+    public Response(Integer id, Object result, ResponseContent.ResponseError error){
+        this.content = new ResponseContent(id, result, error);
+        autoCalculateHeaderLength();
     }
 
     public ResponseContent getContent() {

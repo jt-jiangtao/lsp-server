@@ -8,7 +8,7 @@ import lombok.Data;
  * @Author: jiangtao
  * @Date: 2021/10/14 21:03
  */
-public class NotificationContent implements Content {
+public class NotificationContent extends Content {
     private String method;
     private Params params;
 
@@ -21,15 +21,7 @@ public class NotificationContent implements Content {
         return method;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
     public Params getParams() {
         return params;
-    }
-
-    public void setParams(Params params) {
-        this.params = params;
     }
 }

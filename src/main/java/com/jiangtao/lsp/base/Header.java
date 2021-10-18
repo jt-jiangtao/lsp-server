@@ -10,6 +10,9 @@ public class Header {
     private Integer contentLength;
     private String contentType = "utf-8";
 
+    public Header() {
+    }
+
     public Header(Integer contentLength) {
         this.contentLength = contentLength;
     }
@@ -23,12 +26,12 @@ public class Header {
         this.contentType = contentType;
     }
 
-    public Integer getContentLength() {
-        return contentLength;
-    }
-
     public void setContentLength(Integer contentLength) {
         this.contentLength = contentLength;
+    }
+
+    public Integer getContentLength() {
+        return contentLength;
     }
 
     public String getContentType() {

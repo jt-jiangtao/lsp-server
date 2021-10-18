@@ -10,12 +10,16 @@ import com.jiangtao.lsp.general.InitializeResult;
  * @Author: jiangtao
  * @Date: 2021/10/18 12:35
  */
-public class FirstRequest implements Message {
-    private Header header;
+public class FirstRequest extends Message {
     private FirstResponseContent content;
 
+    public FirstRequest(Integer id){
+        this.content = new FirstResponseContent(id);
+        autoCalculateHeaderLength();
+    }
+
     public FirstRequest(Header header, FirstResponseContent content) {
-        this.header = header;
+        this.setHeader(header);
         this.content = content;
     }
 
@@ -29,17 +33,18 @@ public class FirstRequest implements Message {
         autoCalculateHeaderLength();
     }
 
-    private void autoCalculateHeaderLength() {
-        this.header = new Header(JSON.toJSON(content).toString().length());
-    }
-
-    private class FirstResponseContent implements Content{
+    private class FirstResponseContent extends Content {
         private Integer id;
         private Params result;
 
         public FirstResponseContent(Integer id, Params result) {
             this.id = id;
             this.result = result;
+        }
+
+        public FirstResponseContent(Integer id){
+            this.id = id;
+            this.result = new InitializeResult();
         }
 
         public FirstResponseContent(Integer id, String name, String version){
@@ -51,5 +56,29 @@ public class FirstRequest implements Message {
             this.id = id;
             this.result = new InitializeResult(name);
         }
+
+        public Integer getId() {
+            return id;
+        }
+
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        public Params getResult() {
+            return result;
+        }
+
+        public void setResult(Params result) {
+            this.result = result;
+        }
+    }
+
+    public FirstResponseContent getContent() {
+        return content;
+    }
+
+    public void setContent(FirstResponseContent content) {
+        this.content = content;
     }
 }

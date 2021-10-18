@@ -7,8 +7,11 @@ import com.jiangtao.lsp.base.interfaces.Params;
  * @Date: 2021/10/18 12:24
  */
 public class InitializeResult implements Params {
-    private ServerCapabilities capabilities;
+    private ServerCapabilities capabilities = new ServerCapabilities();
     private ServerInfo serverInfo;
+
+    public InitializeResult(){
+    }
 
     public InitializeResult(ServerCapabilities capabilities, ServerInfo serverInfo) {
         this.capabilities = capabilities;

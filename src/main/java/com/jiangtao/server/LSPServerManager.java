@@ -3,9 +3,11 @@ package com.jiangtao.server;
 import com.alibaba.fastjson.JSONObject;
 import com.jiangtao.client.Client;
 import com.jiangtao.client.ClientProxy;
+import com.jiangtao.handler.AutoWaveHandler;
 import com.jiangtao.handler.ClientManagerHandler;
 import com.jiangtao.handler.ContentDecoder;
 import com.jiangtao.handler.LSPBasedFrameDecoder;
+import com.jiangtao.lsp.base.FirstRequest;
 import com.jiangtao.lsp.transfer.TransferInfo;
 import com.jiangtao.lsp.window.ShowMessageRequestParamsRequest;
 import com.jiangtao.lsp.window.enums.MessageType;
@@ -46,6 +48,7 @@ public class LSPServerManager {
         LoggingHandler LOGGING_HANDLER = new LoggingHandler(LogLevel.DEBUG);
         ContentDecoder CONTENT_DECODER = new ContentDecoder();
         ClientManagerHandler CLIENT_MANAGER_HANDLER = new ClientManagerHandler();
+        AutoWaveHandler AUTO_WAVE_HANDLER = new AutoWaveHandler();
         try {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.channel(NioServerSocketChannel.class);
@@ -54,38 +57,29 @@ public class LSPServerManager {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ChannelPipeline pipeline = ch.pipeline();
+                    pipeline.addLast(LOGGING_HANDLER);
                     pipeline.addLast(new StringEncoder());
                     pipeline.addLast(new ByteArrayEncoder());
+
+                    // 连接管理handler
                     pipeline.addLast(CLIENT_MANAGER_HANDLER);
+                    // LSP解码为Object
                     pipeline.addLast(new LSPBasedFrameDecoder());
+                    // 自动第一次招手
+                    pipeline.addLast(AUTO_WAVE_HANDLER);
+                    // 序列化与反序列化
                     pipeline.addLast(CONTENT_DECODER);
-                    pipeline.addLast(LOGGING_HANDLER);
 
-
+                    // TODO: 调度handler
                     pipeline.addLast(new ChannelInboundHandlerAdapter(){
                         @Override
                         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                             TransferInfo info = (TransferInfo) msg;
-                            String content = "";
-                            String ms = "";
-                            if (((JSONObject) info.getContent()).get("method") != null) {
-                                if (((JSONObject) info.getContent()).get("method").equals("initialize")) {
-                                    content = "{\"jsonrpc\":\"2.0\",\"id\":0,\"result\":{\"capabilities\":{}}}";
-                                    ms = "Content-Length: "+content.length()+"\r\n\r\n"+content;
-                                    ctx.writeAndFlush(ms);
-                                }
-                            }
 
                             if (((JSONObject) info.getContent()).get("method") != null){
                                 if (((JSONObject) info.getContent()).get("method").equals("workspace/didChangeWatchedFiles")){
-//                                    content = "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"window/showMessageRequest\",\"params\":{\"type\":1,\"message\":\"hello\"}}";
-//                                    content = "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"window/showMessageRequest\",\"params\":{\"type\":1,\"message\":\"hello\",\"actions\":[\"Retry\",\"No\"]}}";
-//                                    content = "{\"jsonrpc\":\"2.0\",\"id\":0,\"method\":\"window/logMessage\",\"params\":{\"type\":1,\"message\":\"hello\"}}";
-//                                    ms = "Content-Length: "+content.length()+"\r\n\r\n"+content;
-//                                    ctx.writeAndFlush(ms);
-                                    ShowMessageRequestParamsRequest showMessageRequestParamsRequest = new ShowMessageRequestParamsRequest(1, MessageType.Info, "hello");
-                                    Client client = ClientProxy.getInstance(showMessageRequestParamsRequest);
-                                    client.send();
+                                    ShowMessageRequestParamsRequest showMessageRequestParamsRequest = new ShowMessageRequestParamsRequest(1, MessageType.Error, "hello");
+                                    showMessageRequestParamsRequest.send(null);
                                 }
                             }
                             super.channelRead(ctx, msg);
@@ -93,7 +87,7 @@ public class LSPServerManager {
                     });
                 }
             });
-            Channel channel = serverBootstrap.bind("127.0.0.1", 8081).sync().channel();
+            Channel channel = serverBootstrap.bind("127.0.0.1", port).sync().channel();
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             log.error("Server error", e);
@@ -109,9 +103,5 @@ public class LSPServerManager {
 
     public int getPort() {
         return port;
-    }
-
-    public static void main(String[] args) {
-        new LSPServerManager(8081).start();
     }
 }

@@ -8,7 +8,7 @@ import lombok.Data;
  * @Author: jiangtao
  * @Date: 2021/10/14 20:50
  */
-public class RequestContent implements Content {
+public class RequestContent extends Content {
     private Integer id;
     private String method;
     private Params params;
@@ -23,23 +23,11 @@ public class RequestContent implements Content {
         return id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public String getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
-    }
-
     public Params getParams() {
         return params;
-    }
-
-    public void setParams(Params params) {
-        this.params = params;
     }
 }
