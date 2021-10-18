@@ -3,10 +3,8 @@ package com.jiangtao.server;
 import com.alibaba.fastjson.JSONObject;
 import com.jiangtao.client.Client;
 import com.jiangtao.client.ClientProxy;
-import com.jiangtao.handler.AutoWaveHandler;
-import com.jiangtao.handler.ClientManagerHandler;
-import com.jiangtao.handler.ContentDecoder;
-import com.jiangtao.handler.LSPBasedFrameDecoder;
+import com.jiangtao.distribute.DistributeManager;
+import com.jiangtao.handler.*;
 import com.jiangtao.lsp.base.FirstRequest;
 import com.jiangtao.lsp.transfer.TransferInfo;
 import com.jiangtao.lsp.window.ShowMessageRequestParamsRequest;
@@ -43,6 +41,11 @@ public class LSPServerManager {
     }
 
     public void start() {
+        try {
+            DistributeManager.scanner();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         NioEventLoopGroup boss = new NioEventLoopGroup();
         NioEventLoopGroup worker = new NioEventLoopGroup();
         LoggingHandler LOGGING_HANDLER = new LoggingHandler(LogLevel.DEBUG);
@@ -66,11 +69,13 @@ public class LSPServerManager {
                     // LSP解码为Object
                     pipeline.addLast(new LSPBasedFrameDecoder());
                     // 自动第一次招手
-                    pipeline.addLast(AUTO_WAVE_HANDLER);
+//                    pipeline.addLast(AUTO_WAVE_HANDLER);
                     // 序列化与反序列化
                     pipeline.addLast(CONTENT_DECODER);
 
-                    // TODO: 调度handler
+                    // 调度handler
+                    pipeline.addLast(new DistributeHandler());
+
                     pipeline.addLast(new ChannelInboundHandlerAdapter(){
                         @Override
                         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
